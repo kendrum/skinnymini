@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Skinny Mini</title>
+<link rel="stylesheet" href="styles.css">
+</head>
+<body>
+
+<h1 style="font-size:40px; font-weight:600; color:green">The New Skinny Mini Diet for 2020</h1>
+<!--<body onload="currentTime(),target(),process()">-->
+<p>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Your target weight for today: &nbsp;&nbsp;&nbsp;<span id="today" style="font-size:50px"></span></span></p>
+<label for="weight">Enter today's weight before first meal:&nbsp;&nbsp;&nbsp;</label>
+<input type="text" id="weight" name="weight" value="" maxlength="5" size="1" autofocus style="font-size:50px">&nbsp;<br><br>
+
+
+<span id="message"></span><br>
+
+<span id="tomorrowTarget">Your Target Weight For Tomorrow: &nbsp;&nbsp;<span id="tomorrow" style="font-size:50px"></span></span><br><br><br>
+
+<div class="slidecontainer">
+  <span>Slower Weght Loss&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</span><span id="demo" style="font-size: 20px; font-weight: bold; color:blue"></span><span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Faster Weight Loss</span><br>
+  <input type="range" min="100" max="1000" value="100" class="slider" id="myRange">
+</div>
+<div style="font-size:16px">Adjust the slider for the amount of weight to lose each day.<br>
+This setting should not usually be changed.</div><br><br>
+
+<button onclick="reset()" id="reset">Reset and Clear all weight records</button> 
+
+</body>
+
+<script>
+let loseAmount
+let today,weight,tomorrow
+let slider = document.getElementById("myRange");
+let lose=Number(localStorage.getItem(loseAmount))
+if (!lose) lose=.1
+
+getTargetForToday()
+setLose()
+
+function getTargetForToday() {
+  let t="d-"+currentTime()
+  today=localStorage.getItem(t)
+  let todayString=document.getElementById("today")
+  if (!today) {todayString.innerHTML='<span style="font-size:20px">(No target set yet)</span>'}
+  else {todayString.innerHTML=today}
+  console.log("t="+t)
+  console.log("currentTime="+currentTime())
+  console.log("tomorrowTime="+tomorrowTime())
+  console.log("today="+today)
+}
+
+function currentTime(){
+  let d = new Date();
+  d = d.getFullYear() + "-" + ('0' + (d.getMonth() + 1)).slice(-2) + "-" + ('0' + d.getDate()).slice(-2)
+  //d = "2020-04-06"    // Keep this line for testing tomorrow's date
+  return d
+}
+
+function tomorrowTime(){
+  let d = new Date();
+  d.setDate(d.getDate() +1)   // This line sets the date for tomorrow (1 day after today)
+  let dayString = d.getFullYear() + "-" + ('0' + (d.getMonth() + 1)).slice(-2) + "-" + ('0' + d.getDate()).slice(-2)
+  return dayString
+}
+
+function setLose() {
+  document.getElementById("myRange").value=lose*1000
+}
+
+let sliderOutput = document.getElementById("demo");
+sliderOutput.innerHTML = (lose).toFixed(1)+" per day"
+
+slider.oninput = function() {
+  sliderOutput.innerHTML = (this.value/1000).toFixed(1)+" per day";
+  lose=(this.value/1000).toFixed(1)
+  localStorage.setItem(loseAmount,lose)
+}
+
+let weightInput = document.getElementById("weight");        // ****************  Enter key is pressed  ********
+weightInput.addEventListener("keyup", function(event) {
+  if (event.keyCode === 13) {                             
+    event.preventDefault();
+    weight=Number(weightInput.value)
+    if (today) {
+      if (weight < today) {
+        document.getElementById('message').innerHTML="Great! You have exceeded your weight loss target for today."
+      } else if (weight==today) {
+        document.getElementById("message").innerHTML="Very good! You have met your weight loss target for today."
+      } else if (weight > today) {
+        document.getElementById("message").innerHTML="Oops! You did not meet your weight loss target for today."
+      }
+    }
+    
+    slider.oninput()      // Check if the slider has moved
+
+    //if (!today) today=weight
+    today=Number(today)
+    weight=Number(weight)
+    if (!today)  tomorrow=Math.floor((weight-lose) * 10).toFixed(0) / 10   // Calculate the target for tomorrow
+    else tomorrow=Math.floor(((today+weight)/2-lose) * 10).toFixed(0) / 10   // Calculate the target for tomorrow
+    console.log("today,weight,tomorrow:",today,weight,tomorrow)
+    localStorage.setItem("d-"+tomorrowTime(),tomorrow)
+    console.log("today, weight, tomorrow:",today,weight,tomorrow)
+    document.getElementById("tomorrow").innerHTML = tomorrow  //.toFixed(1)
+    d=new Date()
+  }
+});
+
+function reset(){
+  localStorage.clear()
+  document.getElementById("today").innerHTML=""
+  document.getElementById("weight").value=""
+  document.getElementById("tomorrow").innerHTML=""
+  today=""
+}
+
+</script>
+</html>
